@@ -1,0 +1,1895 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Using TensorFlow backend.\n"
+     ]
+    }
+   ],
+   "source": [
+    "import torch\n",
+    "import torchvision\n",
+    "import torch.nn as nn\n",
+    "import torch.nn.functional as F\n",
+    "from torchvision import datasets \n",
+    "from torchvision import transforms\n",
+    "from torchvision.utils import save_image\n",
+    "from torch.autograd import Variable\n",
+    "\n",
+    "\n",
+    "import pandas as pd \n",
+    "import numpy as np\n",
+    "import os \n",
+    "import glob\n",
+    "np.random.seed(1337)  # for reproducibility\n",
+    "from sklearn import preprocessing\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "import torch.optim as optim\n",
+    "import torch\n",
+    "import torch.nn.functional as nn\n",
+    "import torch.autograd as autograd\n",
+    "import torch.optim as optim\n",
+    "import numpy as np\n",
+    "#import matplotlib.pyplot as plt\n",
+    "#import matplotlib.gridspec as gridspec\n",
+    "import os\n",
+    "from torch.autograd import Variable\n",
+    "from sklearn.utils import shuffle\n",
+    "import random\n",
+    "from keras.datasets import mnist\n",
+    "from keras.callbacks import EarlyStopping\n",
+    "from keras.callbacks import ModelCheckpoint\n",
+    "from keras.models import Sequential\n",
+    "from keras.layers import Dense, Dropout, Activation, Flatten\n",
+    "from keras.layers import Convolution2D, MaxPooling2D\n",
+    "from keras.utils import np_utils\n",
+    "from keras import backend as K\n",
+    "from keras import optimizers\n",
+    "import matplotlib.pyplot as plt\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "train_lre_10sec = pd.read_csv('/home/satishk/GAN_lre/gan_csv/GAN_3sec_ivectors_X_train_23Jan_labels_ids_combined_extraction.csv')\n",
+    "#train_afds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th>6</th>\n",
+       "      <th>7</th>\n",
+       "      <th>8</th>\n",
+       "      <th>9</th>\n",
+       "      <th>...</th>\n",
+       "      <th>495</th>\n",
+       "      <th>496</th>\n",
+       "      <th>497</th>\n",
+       "      <th>498</th>\n",
+       "      <th>499</th>\n",
+       "      <th>ids</th>\n",
+       "      <th>year</th>\n",
+       "      <th>data</th>\n",
+       "      <th>lang</th>\n",
+       "      <th>lang_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>-0.288856</td>\n",
+       "      <td>1.077276</td>\n",
+       "      <td>-0.997014</td>\n",
+       "      <td>-1.551668</td>\n",
+       "      <td>1.872073</td>\n",
+       "      <td>2.065912</td>\n",
+       "      <td>0.372257</td>\n",
+       "      <td>0.572046</td>\n",
+       "      <td>0.193405</td>\n",
+       "      <td>1.757147</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.438400</td>\n",
+       "      <td>-1.656095</td>\n",
+       "      <td>-2.260519</td>\n",
+       "      <td>-2.310296</td>\n",
+       "      <td>-0.116104</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>-0.817944</td>\n",
+       "      <td>0.533774</td>\n",
+       "      <td>-0.220520</td>\n",
+       "      <td>-1.179676</td>\n",
+       "      <td>1.978820</td>\n",
+       "      <td>1.625874</td>\n",
+       "      <td>2.724428</td>\n",
+       "      <td>0.002258</td>\n",
+       "      <td>0.602494</td>\n",
+       "      <td>0.557696</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.072783</td>\n",
+       "      <td>0.355132</td>\n",
+       "      <td>-0.455919</td>\n",
+       "      <td>0.457748</td>\n",
+       "      <td>0.441314</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>-0.254045</td>\n",
+       "      <td>0.516111</td>\n",
+       "      <td>-2.342719</td>\n",
+       "      <td>-0.168260</td>\n",
+       "      <td>2.135270</td>\n",
+       "      <td>1.840081</td>\n",
+       "      <td>1.099695</td>\n",
+       "      <td>-0.824896</td>\n",
+       "      <td>1.183893</td>\n",
+       "      <td>1.348687</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.369343</td>\n",
+       "      <td>1.227145</td>\n",
+       "      <td>0.261007</td>\n",
+       "      <td>-1.896720</td>\n",
+       "      <td>-1.880805</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0.312335</td>\n",
+       "      <td>1.028501</td>\n",
+       "      <td>0.949289</td>\n",
+       "      <td>-0.038601</td>\n",
+       "      <td>-0.316138</td>\n",
+       "      <td>2.581506</td>\n",
+       "      <td>-0.385537</td>\n",
+       "      <td>0.003561</td>\n",
+       "      <td>0.208976</td>\n",
+       "      <td>1.881144</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.189522</td>\n",
+       "      <td>4.442143</td>\n",
+       "      <td>-1.973735</td>\n",
+       "      <td>-0.300837</td>\n",
+       "      <td>-1.459117</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0.427070</td>\n",
+       "      <td>-0.041225</td>\n",
+       "      <td>-0.120159</td>\n",
+       "      <td>-1.673124</td>\n",
+       "      <td>0.709581</td>\n",
+       "      <td>0.949306</td>\n",
+       "      <td>-0.719441</td>\n",
+       "      <td>-0.731202</td>\n",
+       "      <td>-0.413784</td>\n",
+       "      <td>0.505109</td>\n",
+       "      <td>...</td>\n",
+       "      <td>2.190149</td>\n",
+       "      <td>2.663788</td>\n",
+       "      <td>0.177806</td>\n",
+       "      <td>0.539857</td>\n",
+       "      <td>-2.358348</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 505 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          0         1         2         3         4         5         6  \\\n",
+       "0 -0.288856  1.077276 -0.997014 -1.551668  1.872073  2.065912  0.372257   \n",
+       "1 -0.817944  0.533774 -0.220520 -1.179676  1.978820  1.625874  2.724428   \n",
+       "2 -0.254045  0.516111 -2.342719 -0.168260  2.135270  1.840081  1.099695   \n",
+       "3  0.312335  1.028501  0.949289 -0.038601 -0.316138  2.581506 -0.385537   \n",
+       "4  0.427070 -0.041225 -0.120159 -1.673124  0.709581  0.949306 -0.719441   \n",
+       "\n",
+       "          7         8         9        ...              495       496  \\\n",
+       "0  0.572046  0.193405  1.757147        ...        -0.438400 -1.656095   \n",
+       "1  0.002258  0.602494  0.557696        ...        -0.072783  0.355132   \n",
+       "2 -0.824896  1.183893  1.348687        ...        -0.369343  1.227145   \n",
+       "3  0.003561  0.208976  1.881144        ...        -0.189522  4.442143   \n",
+       "4 -0.731202 -0.413784  0.505109        ...         2.190149  2.663788   \n",
+       "\n",
+       "        497       498       499               ids        year  data     lang  \\\n",
+       "0 -2.260519 -2.310296 -0.116104             zkllk  LDC2017E22  data  eng-usg   \n",
+       "1 -0.455919  0.457748  0.441314             zkllk  LDC2017E22  data  eng-usg   \n",
+       "2  0.261007 -1.896720 -1.880805             zkllk  LDC2017E22  data  eng-usg   \n",
+       "3 -1.973735 -0.300837 -1.459117  lid05e1_lid00562  LDC2017E22  data  eng-usg   \n",
+       "4  0.177806  0.539857 -2.358348  lid05e1_lid00562  LDC2017E22  data  eng-usg   \n",
+       "\n",
+       "            lang_id  \n",
+       "0             zkllk  \n",
+       "1             zkllk  \n",
+       "2             zkllk  \n",
+       "3  lid05e1_lid00562  \n",
+       "4  lid05e1_lid00562  \n",
+       "\n",
+       "[5 rows x 505 columns]"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_lre_10sec.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train_10sec = train_lre_10sec.drop(['ids','year','data','lang','lang_id'],axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#train_lre = train_lre.iloc[1000:2000]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "train_lre_30sec = pd.read_csv('/home/satishk/GAN_lre/gan_csv/GAN_10sec_ivectors_X_train_23Jan_labels_ids_combined_extraction.csv')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th>6</th>\n",
+       "      <th>7</th>\n",
+       "      <th>8</th>\n",
+       "      <th>9</th>\n",
+       "      <th>...</th>\n",
+       "      <th>495</th>\n",
+       "      <th>496</th>\n",
+       "      <th>497</th>\n",
+       "      <th>498</th>\n",
+       "      <th>499</th>\n",
+       "      <th>ids</th>\n",
+       "      <th>year</th>\n",
+       "      <th>data</th>\n",
+       "      <th>lang</th>\n",
+       "      <th>lang_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>-0.314181</td>\n",
+       "      <td>0.671920</td>\n",
+       "      <td>-0.188068</td>\n",
+       "      <td>-0.910752</td>\n",
+       "      <td>1.050361</td>\n",
+       "      <td>1.966829</td>\n",
+       "      <td>0.292740</td>\n",
+       "      <td>1.084547</td>\n",
+       "      <td>1.287480</td>\n",
+       "      <td>1.745248</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.564911</td>\n",
+       "      <td>-1.854116</td>\n",
+       "      <td>-3.185948</td>\n",
+       "      <td>-2.177057</td>\n",
+       "      <td>0.301166</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>-0.640179</td>\n",
+       "      <td>0.301083</td>\n",
+       "      <td>0.071469</td>\n",
+       "      <td>-0.550717</td>\n",
+       "      <td>1.258704</td>\n",
+       "      <td>1.560921</td>\n",
+       "      <td>0.588061</td>\n",
+       "      <td>0.849878</td>\n",
+       "      <td>1.693304</td>\n",
+       "      <td>1.515224</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-0.109180</td>\n",
+       "      <td>0.066603</td>\n",
+       "      <td>-2.434538</td>\n",
+       "      <td>-0.728701</td>\n",
+       "      <td>1.941986</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>-0.696718</td>\n",
+       "      <td>-0.011839</td>\n",
+       "      <td>-1.394296</td>\n",
+       "      <td>-0.432752</td>\n",
+       "      <td>1.630261</td>\n",
+       "      <td>1.919297</td>\n",
+       "      <td>0.930681</td>\n",
+       "      <td>0.652783</td>\n",
+       "      <td>1.899361</td>\n",
+       "      <td>0.722699</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-2.320411</td>\n",
+       "      <td>-0.358037</td>\n",
+       "      <td>-2.294246</td>\n",
+       "      <td>-1.532981</td>\n",
+       "      <td>-0.590578</td>\n",
+       "      <td>zkllk</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>zkllk</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0.503734</td>\n",
+       "      <td>0.247072</td>\n",
+       "      <td>0.451463</td>\n",
+       "      <td>0.500546</td>\n",
+       "      <td>-0.716668</td>\n",
+       "      <td>1.337575</td>\n",
+       "      <td>-1.027019</td>\n",
+       "      <td>0.773720</td>\n",
+       "      <td>0.910362</td>\n",
+       "      <td>1.728001</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.886613</td>\n",
+       "      <td>6.766799</td>\n",
+       "      <td>-1.040380</td>\n",
+       "      <td>-0.751316</td>\n",
+       "      <td>-1.487938</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>-0.088514</td>\n",
+       "      <td>0.886515</td>\n",
+       "      <td>0.095606</td>\n",
+       "      <td>-0.870576</td>\n",
+       "      <td>1.269740</td>\n",
+       "      <td>1.076300</td>\n",
+       "      <td>-0.073294</td>\n",
+       "      <td>-0.330384</td>\n",
+       "      <td>-0.789608</td>\n",
+       "      <td>0.358869</td>\n",
+       "      <td>...</td>\n",
+       "      <td>1.725191</td>\n",
+       "      <td>1.086392</td>\n",
+       "      <td>0.900200</td>\n",
+       "      <td>1.200539</td>\n",
+       "      <td>-2.001619</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "      <td>LDC2017E22</td>\n",
+       "      <td>data</td>\n",
+       "      <td>eng-usg</td>\n",
+       "      <td>lid05e1_lid00562</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 505 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          0         1         2         3         4         5         6  \\\n",
+       "0 -0.314181  0.671920 -0.188068 -0.910752  1.050361  1.966829  0.292740   \n",
+       "1 -0.640179  0.301083  0.071469 -0.550717  1.258704  1.560921  0.588061   \n",
+       "2 -0.696718 -0.011839 -1.394296 -0.432752  1.630261  1.919297  0.930681   \n",
+       "3  0.503734  0.247072  0.451463  0.500546 -0.716668  1.337575 -1.027019   \n",
+       "4 -0.088514  0.886515  0.095606 -0.870576  1.269740  1.076300 -0.073294   \n",
+       "\n",
+       "          7         8         9        ...              495       496  \\\n",
+       "0  1.084547  1.287480  1.745248        ...        -0.564911 -1.854116   \n",
+       "1  0.849878  1.693304  1.515224        ...        -0.109180  0.066603   \n",
+       "2  0.652783  1.899361  0.722699        ...        -2.320411 -0.358037   \n",
+       "3  0.773720  0.910362  1.728001        ...         0.886613  6.766799   \n",
+       "4 -0.330384 -0.789608  0.358869        ...         1.725191  1.086392   \n",
+       "\n",
+       "        497       498       499               ids        year  data     lang  \\\n",
+       "0 -3.185948 -2.177057  0.301166             zkllk  LDC2017E22  data  eng-usg   \n",
+       "1 -2.434538 -0.728701  1.941986             zkllk  LDC2017E22  data  eng-usg   \n",
+       "2 -2.294246 -1.532981 -0.590578             zkllk  LDC2017E22  data  eng-usg   \n",
+       "3 -1.040380 -0.751316 -1.487938  lid05e1_lid00562  LDC2017E22  data  eng-usg   \n",
+       "4  0.900200  1.200539 -2.001619  lid05e1_lid00562  LDC2017E22  data  eng-usg   \n",
+       "\n",
+       "            lang_id  \n",
+       "0             zkllk  \n",
+       "1             zkllk  \n",
+       "2             zkllk  \n",
+       "3  lid05e1_lid00562  \n",
+       "4  lid05e1_lid00562  \n",
+       "\n",
+       "[5 rows x 505 columns]"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_lre_30sec.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train_30sec = train_lre_30sec.drop(['ids','year','data','lang','lang_id'],axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_30sec_labels = train_lre_30sec[\"lang\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0    eng-usg\n",
+       "1    eng-usg\n",
+       "2    eng-usg\n",
+       "3    eng-usg\n",
+       "4    eng-usg\n",
+       "Name: lang, dtype: object"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y_30sec_labels.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "LabelEncoder()"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "le = preprocessing.LabelEncoder()\n",
+    "le.fit(y_30sec_labels)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['ara-acm', 'ara-apc', 'ara-ary', 'ara-arz', 'eng-gbr', 'eng-usg',\n",
+       "       'por-brz', 'qsl-pol', 'qsl-rus', 'spa-car', 'spa-eur', 'spa-lac',\n",
+       "       'zho-cmn', 'zho-nan'], dtype=object)"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "le.classes_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_30sec_labels=le.transform(y_30sec_labels)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(360133,)"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y_30sec_labels.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nb_classes = 14\n",
+    "# convert class vectors to binary class matrices\n",
+    "Y_train_labels = np_utils.to_categorical(y_30sec_labels, nb_classes)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(360133, 14)"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "Y_train_labels.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train_10sec = X_train_10sec.values\n",
+    "X_train_30sec = X_train_30sec.values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "X_train_10sec shape: (360133, 500)\n",
+      "360133 train 10sec\n",
+      "360133  train 30sec\n"
+     ]
+    }
+   ],
+   "source": [
+    "X_train_10sec = X_train_10sec.astype('float32')\n",
+    "#X_test = X_test.astype('float32')\n",
+    "X_train_30sec = X_train_30sec.astype('float32')\n",
+    "\n",
+    "#X_train /= 255\n",
+    "#X_test /= 255\n",
+    "#X_val /= 255\n",
+    "\n",
+    "print('X_train_10sec shape:', X_train_10sec.shape)\n",
+    "print(X_train_10sec.shape[0], 'train 10sec')\n",
+    "#print(X_test.shape[0], 'test samples')\n",
+    "print(X_train_30sec.shape[0], ' train 30sec')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Shuffle the Dataset\n",
+    "X_train_10sec_F, X_test_10sec_F,  X_train_30sec_F, X_test_30sec_F = train_test_split(X_train_10sec, X_train_30sec, test_size=0.20, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Y_train_labels, Y_test_labels = train_test_split(Y_train_labels, test_size=0.20, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_30sec_labels_train, y_30sec_labels_test = train_test_split(y_30sec_labels, test_size=0.20, random_state=42 )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(72027, 500)"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_test_10sec_F.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(288106, 500)"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_train_10sec_F.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import torch.nn as nn"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class FC_Network(torch.nn.Module):\n",
+    "\n",
+    "    def __init__(self,):\n",
+    "        super(FC_Network, self).__init__()\n",
+    "\n",
+    "        D_in = D_out = 500        # param['patch_length'] * param['n_channels'] * (param['n_fft'] / 2 + 1)\n",
+    "        num_nodes_fnn = 512\n",
+    "        self.layer_1 = torch.nn.Linear(D_in, num_nodes_fnn)\n",
+    "        self.bn_1 = torch.nn.BatchNorm1d(num_nodes_fnn)\n",
+    "        self.layer_2 = torch.nn.Linear(num_nodes_fnn, num_nodes_fnn)\n",
+    "        self.bn_2 = torch.nn.BatchNorm1d(num_nodes_fnn)\n",
+    "        self.layer_3 = torch.nn.Linear(num_nodes_fnn, num_nodes_fnn)\n",
+    "        self.bn_3 = torch.nn.BatchNorm1d(num_nodes_fnn)\n",
+    "        self.layer_4 = torch.nn.Linear(num_nodes_fnn,num_nodes_fnn)\n",
+    "        self.bn_4 = torch.nn.BatchNorm1d(num_nodes_fnn)\n",
+    "        self.output_layer = torch.nn.Linear(num_nodes_fnn, D_out)\n",
+    "        self.relu = torch.nn.ReLU()\n",
+    "        self.tanh = torch.nn.Tanh()\n",
+    "\n",
+    "    def forward(self, x):\n",
+    "        out = x\n",
+    "        #out = x.view(x.size(0), -1)\n",
+    "        out = self.bn_1(self.relu(self.layer_1(out)))\n",
+    "        out = self.bn_2(self.relu(self.layer_2(out)))\n",
+    "        out = self.bn_3(self.relu(self.layer_3(out)))\n",
+    "        out = self.bn_4(self.relu(self.layer_4(out)))\n",
+    "        out = (self.output_layer(out))\n",
+    "\n",
+    "        #out = (self.relu(self.layer_1(out)))\n",
+    "        #out = (self.relu(self.layer_2(out)))\n",
+    "        #out = (self.relu(self.layer_3(out)))\n",
+    "        #out = (self.relu(self.layer_4(out)))\n",
+    "        #out = (self.output_layer(out))\n",
+    "        #out = out.view(x.size())\n",
+    "        return out"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "S_encoder = FC_Network()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "FC_Network(\n",
+       "  (layer_1): Linear(in_features=500, out_features=512)\n",
+       "  (bn_1): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True)\n",
+       "  (layer_2): Linear(in_features=512, out_features=512)\n",
+       "  (bn_2): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True)\n",
+       "  (layer_3): Linear(in_features=512, out_features=512)\n",
+       "  (bn_3): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True)\n",
+       "  (layer_4): Linear(in_features=512, out_features=512)\n",
+       "  (bn_4): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True)\n",
+       "  (output_layer): Linear(in_features=512, out_features=500)\n",
+       "  (relu): ReLU()\n",
+       "  (tanh): Tanh()\n",
+       ")"
+      ]
+     },
+     "execution_count": 27,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "S_encoder.cuda()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#To calculate the no of parameters in a model\n",
+    "model_parameters = filter(lambda p: p.requires_grad, S_encoder.parameters())\n",
+    "no_params = sum([np.prod(p.size()) for p in model_parameters])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1305076"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "no_params"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "learning_rate = 0.0002\n",
+    "betas = (0.5, 0.999)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Loss function\n",
+    "criterion = torch.nn.MSELoss()\n",
+    "\n",
+    "# Optimizers\n",
+    "S_solver = torch.optim.Adam(S_encoder.parameters(), lr=learning_rate, \n",
+    "                            betas=betas, weight_decay=1e-5)\n",
+    "#T_solver = torch.optim.Adam(T_encoder.parameters(), lr=learning_rate/2, betas=betas)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "360133"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(X_train_10sec)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "360133"
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(X_train_30sec)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mb_size = 256\n",
+    "batch_size = mb_size"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "epoch: 0\n",
+      "S_loss_train: [ 1.71621644] S_loss_test: [ 1.73134053]\n",
+      "epoch: 1\n",
+      "S_loss_train: [ 1.59670389] S_loss_test: [ 1.59820724]\n",
+      "epoch: 2\n",
+      "S_loss_train: [ 1.55364668] S_loss_test: [ 1.56485045]\n",
+      "epoch: 3\n",
+      "S_loss_train: [ 1.53241277] S_loss_test: [ 1.54434395]\n",
+      "epoch: 4\n",
+      "S_loss_train: [ 1.5178988] S_loss_test: [ 1.54536748]\n",
+      "epoch: 5\n",
+      "S_loss_train: [ 1.50792336] S_loss_test: [ 1.51782298]\n",
+      "epoch: 6\n",
+      "S_loss_train: [ 1.50042784] S_loss_test: [ 1.52202666]\n",
+      "epoch: 7\n",
+      "S_loss_train: [ 1.49374378] S_loss_test: [ 1.49089921]\n",
+      "epoch: 8\n",
+      "S_loss_train: [ 1.48656738] S_loss_test: [ 1.50401402]\n",
+      "epoch: 9\n",
+      "S_loss_train: [ 1.48288274] S_loss_test: [ 1.5001018]\n",
+      "epoch: 10\n",
+      "S_loss_train: [ 1.47857022] S_loss_test: [ 1.48970771]\n",
+      "epoch: 11\n",
+      "S_loss_train: [ 1.47536159] S_loss_test: [ 1.48987567]\n",
+      "epoch: 12\n",
+      "S_loss_train: [ 1.47240102] S_loss_test: [ 1.46444559]\n",
+      "epoch: 13\n",
+      "S_loss_train: [ 1.47033119] S_loss_test: [ 1.46219194]\n",
+      "epoch: 14\n",
+      "S_loss_train: [ 1.46767592] S_loss_test: [ 1.48060393]\n",
+      "epoch: 15\n",
+      "S_loss_train: [ 1.46521699] S_loss_test: [ 1.4477272]\n",
+      "epoch: 16\n",
+      "S_loss_train: [ 1.46266377] S_loss_test: [ 1.47103345]\n",
+      "epoch: 17\n",
+      "S_loss_train: [ 1.4611212] S_loss_test: [ 1.46629882]\n",
+      "epoch: 18\n",
+      "S_loss_train: [ 1.45871985] S_loss_test: [ 1.47831857]\n",
+      "epoch: 19\n",
+      "S_loss_train: [ 1.45681906] S_loss_test: [ 1.48053515]\n",
+      "epoch: 20\n",
+      "S_loss_train: [ 1.4550277] S_loss_test: [ 1.44031096]\n",
+      "epoch: 21\n",
+      "S_loss_train: [ 1.45341635] S_loss_test: [ 1.47730637]\n",
+      "epoch: 22\n",
+      "S_loss_train: [ 1.45219266] S_loss_test: [ 1.45759702]\n",
+      "epoch: 23\n",
+      "S_loss_train: [ 1.45099425] S_loss_test: [ 1.4596709]\n",
+      "epoch: 24\n",
+      "S_loss_train: [ 1.4501003] S_loss_test: [ 1.45289469]\n",
+      "epoch: 25\n",
+      "S_loss_train: [ 1.44885314] S_loss_test: [ 1.44579387]\n",
+      "epoch: 26\n",
+      "S_loss_train: [ 1.44781947] S_loss_test: [ 1.45299315]\n",
+      "epoch: 27\n",
+      "S_loss_train: [ 1.44666755] S_loss_test: [ 1.42599463]\n",
+      "epoch: 28\n",
+      "S_loss_train: [ 1.44542003] S_loss_test: [ 1.46117985]\n",
+      "epoch: 29\n",
+      "S_loss_train: [ 1.44427466] S_loss_test: [ 1.45765615]\n",
+      "epoch: 30\n",
+      "S_loss_train: [ 1.44298196] S_loss_test: [ 1.42490184]\n",
+      "epoch: 31\n",
+      "S_loss_train: [ 1.44177938] S_loss_test: [ 1.45157683]\n",
+      "epoch: 32\n"
+     ]
+    }
+   ],
+   "source": [
+    "train_epoch = []\n",
+    "train_loss_epoch = []\n",
+    "test_loss_epoch = []\n",
+    "mb_size = 256\n",
+    "batch_size = mb_size\n",
+    "# Start training\n",
+    "for epoch in range(100):\n",
+    "    \n",
+    "    \n",
+    "\n",
+    "    print('epoch:',epoch)\n",
+    "    # Build mini-batch dataset\n",
+    "    \n",
+    "\n",
+    "    it=0\n",
+    "    while it+batch_size < len(X_train_10sec_F) :\n",
+    "        \n",
+    "\n",
+    "        start= it\n",
+    "        end= it + batch_size\n",
+    "\n",
+    "\n",
+    "        #z = Variable(torch.randn(mb_size, Z_dim))\n",
+    "        X = X_train_10sec_F[start:end]\n",
+    "        r = np.random.randint(X_test_30sec_F.shape[0], size=256)\n",
+    "        X_test = X_test_10sec_F[r, :]\n",
+    "        #X_test = X_test_10sec_F[0:255]\n",
+    "\n",
+    "        c = X_train_30sec_F[start:end]\n",
+    "        c_test = X_test_30sec_F[r, :]\n",
+    "        #c_test = X_test_30sec_F[0:255]\n",
+    "        \n",
+    "        X = Variable(torch.from_numpy(X))\n",
+    "        c = Variable(torch.from_numpy(c.astype('float32')))\n",
+    "        \n",
+    "        X_test = Variable(torch.from_numpy(X_test))\n",
+    "        c_test = Variable(torch.from_numpy(c_test.astype('float32')))\n",
+    "        \n",
+    "        X = X.cuda()\n",
+    "        X_test = X_test.cuda()\n",
+    "        c = c.cuda()\n",
+    "        c_test = c_test.cuda()\n",
+    "        \n",
+    "        \n",
+    "        S_encoder.train()\n",
+    "        S_sample = S_encoder(X)\n",
+    "        \n",
+    "        S_loss_train = criterion(S_sample, c)\n",
+    "        \n",
+    "        S_loss_train.backward()\n",
+    "        S_solver.step()\n",
+    "        \n",
+    "        S_solver.zero_grad()\n",
+    "        \n",
+    "        S_encoder.eval()\n",
+    "        S_sample_test = S_encoder(X_test)\n",
+    "\n",
+    "        S_loss_test = criterion(S_sample_test, c_test)\n",
+    "        S_solver.zero_grad()\n",
+    "        \n",
+    "\n",
+    "\n",
+    "        it+= batch_size\n",
+    "    train_loss_epoch.append(S_loss_train.cpu().data.numpy())\n",
+    "    test_loss_epoch.append(S_loss_test.cpu().data.numpy())\n",
+    "    train_epoch.append(epoch)\n",
+    "    print('S_loss_train: {}'.format(S_loss_train.cpu().data.numpy()), \n",
+    "          'S_loss_test: {}'.format(S_loss_test.cpu().data.numpy()))\n",
+    "           "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#train_loss_epoch"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.figure(figsize=(30,15))\n",
+    "plt.title('Learning curves for 3-10sec 512', fontsize=30)\n",
+    "plt.xlabel('Epoch', fontsize=30)\n",
+    "plt.ylabel('Loss', fontsize=30)\n",
+    "plt.xticks(fontsize=20)\n",
+    "plt.yticks(fontsize=20)\n",
+    "plt.ylim(0, 2)\n",
+    "\n",
+    "plt.plot(train_loss_epoch,label='Training Curve')\n",
+    "plt.plot(test_loss_epoch,label='Validation Curve')\n",
+    "\n",
+    "plt.legend()\n",
+    "plt.grid()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train_30sec_gen = Variable(torch.from_numpy(X_train_10sec_F))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "S_encoder.eval()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_samples = S_encoder(X_train_30sec_gen.cuda())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_samples.data.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Taking the generated iVectors we will try to check the acc by MLP"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "train_X_gen = gen_samples.cpu().data.numpy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "type(train_X_gen)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "X_train = pd.DataFrame(X_train_10sec)\n",
+    "#Y_train = pd.DataFrame(Y_train)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "val_lre = pd.read_csv('/home/satishk/GAN_lre/gan_csv/dev_feat_BNF_h5_07Feb_3sec.csv')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "val_lre.head()"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "eval_lre = pd.read_csv('/home/satishk/GAN_lre/gan_csv/eval_feat_BNF_h5_03Jan.csv')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_val = val_lre.drop([\"language_code\",\"uttid\",\"segmentid1\",\"data_source\",\"speech_duration\"],axis=1)\n",
+    "y_val = val_lre[\"language_code\"]\n",
+    "y_val_segmentid = val_lre[\"segmentid1\"]"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "X_eval = eval_lre.drop([\"language_code\",\"uttid\",\"segmentid1\",\"data_source\",\"speech_duration\"],axis=1)\n",
+    "y_eval = eval_lre[\"language_code\"]\n",
+    "y_eval_segmentid = eval_lre[\"segmentid1\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_val = X_val.values\n",
+    "#X_eval = X_eval.values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#X_eval.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "le = preprocessing.LabelEncoder()\n",
+    "le.fit(y_val)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "le.classes_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_val_labels = le.transform(y_val)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_val_labels[0:25]"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "le = preprocessing.LabelEncoder()\n",
+    "le.fit(y_eval)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "le.classes_"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "y_eval_labels = le.transform(y_eval)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "y_eval_labels[0:10]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# convert class vectors to binary class matrices\n",
+    "Y_val = np_utils.to_categorical(y_val_labels, nb_classes)\n",
+    "#Y_eval = np_utils.to_categorical(y_eval_labels, nb_classes)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Y_val"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_val = X_val.astype('float32')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "X_val_10sec_gen = Variable(torch.from_numpy(X_val))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_samples_val = S_encoder(X_val_10sec_gen.cuda())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_samples_val.data.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_val_gen = gen_samples_val.cpu().data.numpy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = Sequential()\n",
+    "model.add(Dense(512, input_dim=500))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.5))\n",
+    "\n",
+    "model.add(Dense(512))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.5))\n",
+    "\n",
+    "model.add(Dense(nb_classes))\n",
+    "model.add(Activation('softmax'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.summary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "adam=optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)\n",
+    "\n",
+    "model.compile(loss='categorical_crossentropy',\n",
+    "              optimizer='adam',\n",
+    "              metrics=['accuracy'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "best_weights_filepath = '/home/satishk/saved_weights/best_weights_2l_MLP_11.hdf5'\n",
+    "saveBestModel = ModelCheckpoint(best_weights_filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='auto')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "batch_size = 256\n",
+    "nb_epoch = 25"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#train_X_gen\n",
+    "#Checking Accuracy with augmented data \n",
+    "history = model.fit(X_train_10sec_F, Y_train_labels , batch_size=batch_size, epochs=nb_epoch,verbose=2, \n",
+    "                    validation_data=(X_val , Y_val),callbacks=[saveBestModel])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "score = model.evaluate(X_val, Y_val, verbose=0)\n",
+    "print('Acc %:', score[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn import metrics"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.multiclass import OneVsRestClassifier\n",
+    "from sklearn.svm import SVC\n"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "classif = SVC(C=1, kernel='rbf', gamma='auto', coef0=1, shrinking=True, random_state=0,\n",
+    "                      probability=False, tol=1e-3, cache_size=1e4, class_weight='balanced')\n",
+    "classif.fit(train_X_gen, y_30sec_labels_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "classif = SVC(C=1, kernel='rbf', gamma='auto', coef0=1, shrinking=True, random_state=0,\n",
+    "                      probability=False, tol=1e-3, cache_size=1e4, class_weight='balanced')\n",
+    "classif.fit(X_train_10sec_F, y_30sec_labels_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "classif.classes_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#acc = metrics.accuracy_score(y_val_labels, classif.predict(X_val))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "acc"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_val.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = Sequential()\n",
+    "model.add(Dense(512, input_dim=500))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.5))\n",
+    "\n",
+    "model.add(Dense(512))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.5))\n",
+    "\n",
+    "model.add(Dense(nb_classes))\n",
+    "model.add(Activation('softmax'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.summary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "adam=optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)\n",
+    "\n",
+    "model.compile(loss='categorical_crossentropy',\n",
+    "              optimizer='adam',\n",
+    "              metrics=['accuracy'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "best_weights_filepath = '/home/satishk/saved_weights/best_weights_2l_MLP_11.hdf5'\n",
+    "saveBestModel = ModelCheckpoint(best_weights_filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='auto')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "batch_size = 256\n",
+    "nb_epoch = 25"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#train_X_gen\n",
+    "#Checking Accuracy with augmented data \n",
+    "history = model.fit(X_train_10sec_F, Y_train_labels , batch_size=batch_size, epochs=nb_epoch,verbose=2, \n",
+    "                    validation_data=(X_val , Y_val),callbacks=[saveBestModel])"
+   ]
+  },
+  {
+   "cell_t
